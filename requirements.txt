@@ -1,0 +1,15 @@
+langchain
+langgraph
+langchain_community
+langchain_core
+langchain_groq
+langchain_openai
+pandas
+numpy
+fastapi
+python-dotenv
+uvicorn
+pip
+python-multipart
+pdfplumber
+python-docx
