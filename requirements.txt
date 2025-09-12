@@ -13,3 +13,6 @@ pip
 python-multipart
 pdfplumber
 python-docx
+faiss-cpu
+sentence-transformers
+langchain-huggingface

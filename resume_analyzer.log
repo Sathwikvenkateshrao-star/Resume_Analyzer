@@ -2,3 +2,14 @@
 2025-09-12 13:13:12,137 -ResumeAnalyzer -INFO - Analyzed resume: resume2.docx, Score:0.0
 2025-09-12 13:14:23,250 -ResumeAnalyzer -ERROR - Failed to analyze resume2.docx:400: Job description is required
 2025-09-12 13:17:19,175 -ResumeAnalyzer -ERROR - Failed to analyze :Unsupported file format.Only .pdf and .docx are supported.
+2025-09-12 16:28:41,139 -ResumeAnalyzer -ERROR - Failed to upload resumes: 'list' object has no attribute 'filename'
+2025-09-12 19:24:09,871 -ResumeAnalyzer -ERROR - Failed to upload resumes: 'list' object has no attribute 'filename'
+2025-09-12 19:28:26,067 -ResumeAnalyzer -ERROR - Failed to upload resumes: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-09-12 19:39:35,603 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
+2025-09-12 19:45:05,910 -ResumeAnalyzer -INFO - Analyzed 10 resumes against JD
+2025-09-12 20:15:42,754 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
+2025-09-12 20:16:28,886 -ResumeAnalyzer -INFO - Analyzed 10 resumes against JD
+2025-09-12 20:19:13,344 -ResumeAnalyzer -INFO - Ranked 20 resumes against JD
+2025-09-12 20:37:26,627 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
+2025-09-12 20:38:04,502 -ResumeAnalyzer -INFO - Analyzed 10 resumes against JD
+2025-09-12 20:39:19,800 -ResumeAnalyzer -INFO - Ranked 20 resumes against JD
