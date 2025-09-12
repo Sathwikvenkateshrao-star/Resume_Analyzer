@@ -1,0 +1,4 @@
+2025-09-12 13:12:02,811 -ResumeAnalyzer -INFO - Analyzed resume: resume 1.pdf, Score:5.0
+2025-09-12 13:13:12,137 -ResumeAnalyzer -INFO - Analyzed resume: resume2.docx, Score:0.0
+2025-09-12 13:14:23,250 -ResumeAnalyzer -ERROR - Failed to analyze resume2.docx:400: Job description is required
+2025-09-12 13:17:19,175 -ResumeAnalyzer -ERROR - Failed to analyze :Unsupported file format.Only .pdf and .docx are supported.

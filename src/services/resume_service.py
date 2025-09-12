@@ -19,7 +19,7 @@ class ResumeService:
         output_parser = StructuredOutputParser.from_response_schemas(response_schemas)
         format_instructions = output_parser.get_format_instructions()
 
-        # ✅ pass format_instructions as a variable, not inline
+        # pass format_instructions as a variable, not inline
         prompt = ChatPromptTemplate.from_template("""
         You are a resume evaluator. Compare the resume with the job description.
 
@@ -41,10 +41,12 @@ class ResumeService:
                 "format_instructions": format_instructions
             })
             return ResumeAnalysis(**result)
+        
         except Exception as e:
+            print("LLM parsing Failed:",str(e))
             return ResumeAnalysis(
                 strengths=[],
                 weaknesses=[],
                 score=0.0,
-                summary=f"Parsing failed: {e}"
+                summary=f"Fallback could not parse structured output.Error:{e}"
             )

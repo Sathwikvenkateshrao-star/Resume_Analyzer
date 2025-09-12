@@ -1,6 +1,7 @@
 import pdfplumber
 import docx
 
+#  Resume Extractor with the Error handling
 class ResumeExtractor:
     @staticmethod
     def extract_text(file_path:str)->str:
@@ -16,11 +17,17 @@ class ResumeExtractor:
         text = ""
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:
-                text+= page.extract_text() or ""
+                page_text = page.extract_text() 
+                if page_text:
+                    text += page_text + "\n"
+        if not text.strip():
+            raise ValueError("Could not extract text from pdf (maybe scanned image?).")
         return text.strip()
     
     @staticmethod
     def _extract_docx(file_path:str) -> str:
         doc = docx.Document(file_path)
-        text = "\n".join([para.text for para in doc.paragraphs])
+        text = "\n".join([para.text for para in doc.paragraphs if para.text.strip()])
+        if not text.strip():
+            raise ValueError("Could not extract text from DOCX")
         return text.strip()
