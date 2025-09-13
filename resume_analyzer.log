@@ -13,3 +13,30 @@
 2025-09-12 20:37:26,627 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
 2025-09-12 20:38:04,502 -ResumeAnalyzer -INFO - Analyzed 10 resumes against JD
 2025-09-12 20:39:19,800 -ResumeAnalyzer -INFO - Ranked 20 resumes against JD
+2025-09-13 00:51:17,832 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
+2025-09-13 00:51:29,275 -ResumeAnalyzer -INFO - Analyzed 10 resumes against JD
+2025-09-13 00:51:54,111 -ResumeAnalyzer -INFO - Ranked 20 resumes against JD
+2025-09-13 00:55:43,199 -ResumeAnalyzer -ERROR - Failed to save analysis :Mapper 'Mapper[AnalysisResult(analysis_results)]' has no property 'candidates'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-13 11:57:44,973 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
+2025-09-13 11:58:08,878 -ResumeAnalyzer -INFO - Analyzed 10 resumes against JD
+2025-09-13 11:58:47,104 -ResumeAnalyzer -INFO - Ranked 20 resumes against JD
+2025-09-13 12:06:02,065 -ResumeAnalyzer -ERROR - Failed to save analysis :Mapper 'Mapper[AnalysisResult(analysis_results)]' has no property 'candidates'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-13 12:11:20,381 -ResumeAnalyzer -ERROR - Failed to save analysis :Mapper 'Mapper[AnalysisResult(analysis_results)]' has no property 'candidates'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-13 12:11:58,076 -ResumeAnalyzer -ERROR - Failed to save analysis :Mapper 'Mapper[JobDescription(job_description)]' has no property 'analysis'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-13 12:13:31,359 -ResumeAnalyzer -ERROR - Failed to save analysis :Mapper 'Mapper[Candidate(candidates)]' has no property 'analyses'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-13 12:14:19,287 -ResumeAnalyzer -ERROR - Failed to save analysis :(sqlite3.OperationalError) no such table: job_description
+[SQL: INSERT INTO job_description (title, description, created_at) VALUES (?, ?, ?)]
+[parameters: (None, ' Looking for a frontend developer with React and UI/UX experience', '2025-09-13 06:44:19.285128')]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-13 12:17:04,864 -ResumeAnalyzer -ERROR - Failed to save analysis :Could not determine join condition between parent/child tables on relationship JobDescription.analyses - there are no foreign keys linking these tables.  Ensure that referencing columns are associated with a ForeignKey or ForeignKeyConstraint, or specify a 'primaryjoin' expression.
+2025-09-13 12:34:10,540 -ResumeAnalyzer -ERROR - Failed to save analysis :'resume_text'
+2025-09-13 12:36:43,962 -ResumeAnalyzer -ERROR - Failed to save analysis :'resume_text'
+2025-09-13 12:41:42,285 -ResumeAnalyzer -ERROR - Failed to save analysis :'builtin_function_or_method' object is not subscriptable
+2025-09-13 19:25:38,587 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
+2025-09-13 19:27:27,896 -ResumeAnalyzer -INFO - Analyzed 10 resumes against JD
+2025-09-13 19:28:09,177 -ResumeAnalyzer -INFO - Ranked 20 resumes against JD
+2025-09-13 19:29:30,134 -ResumeAnalyzer -ERROR - Failed to save analysis :'str' object has no attribute 'get'
+2025-09-13 19:34:48,583 -ResumeAnalyzer -ERROR - Failed to save analysis :'str' object has no attribute 'get'
+2025-09-13 19:34:52,852 -ResumeAnalyzer -ERROR - Failed to save analysis :'str' object has no attribute 'get'
+2025-09-13 19:44:01,321 -ResumeAnalyzer -ERROR - Failed to save analysis :'str' object has no attribute 'get'
+2025-09-13 19:49:49,020 -ResumeAnalyzer -ERROR - Failed to save analysis :'str' object has no attribute 'get'

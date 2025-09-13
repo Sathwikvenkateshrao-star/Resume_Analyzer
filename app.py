@@ -5,11 +5,18 @@ from src.services.resume_service import ResumeService
 from src.models.resume_model import ResumeAnalysis, ResumeInput
 from src.utils.resume_extractor import ResumeExtractor
 from src.utils.logger import get_logger
+from fastapi import FastAPI
+from src.db.database import init_db
 
 
 app = FastAPI()
 resume_service = ResumeService()
 logger = get_logger("ResumeAnalyzer")
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
+    print("Database Initialized on startup")
 
 @app.post("/analyze_resume_file", response_model=ResumeAnalysis)
 async def analyze_resume_file(
@@ -88,5 +95,53 @@ async def ranked_resumes(job_description:str = Form(...)):
 
         return {"ranked_results":[r.model_dump() for r in results]}
     except Exception as e:
-        logger.error(f"❌ Failed to rank resumes: {e}")
+        logger.error(f" Failed to rank resumes: {e}")
         raise HTTPException(status_code=500, detail=f"Internal error: {e}")
+    
+    # New End Point for the DB 
+@app.post("/save_analysis")
+async def save_analysis(
+    resume_files: List[UploadFile] = File(...),  # multiple resumes
+    job_description: str = Form(...),
+    title: str = Form(...)
+):
+    try:
+        job_data = {
+            "title": title,
+            "description": job_description
+        }
+
+        saved_results = []  
+
+        for resume_file in resume_files:
+            # Save file temporarily
+            with tempfile.NamedTemporaryFile(delete=False, suffix=resume_file.filename) as tmp:
+                tmp.write(await resume_file.read())
+                file_path = tmp.name
+
+            # Extract resume text
+            resume_txt = ResumeExtractor.extract_text(file_path)
+
+            # Analyze
+            data = ResumeInput(resume_text=resume_txt, job_description=job_description)
+            result = resume_service.analyze_resume(data)
+
+            # Candidate data
+            candidate_data = {
+                "name": None,
+                "email": None,
+                "phone": None,
+                "skills": [],
+                "resume_text": resume_txt
+            }
+
+            # Save into DB
+            saved = resume_service.save_analysis(candidate_data, job_data, result)
+            saved_results.append(saved.id)
+
+        # return after processing all files
+        return {"message": f"Saved {len(saved_results)} analyses", "result_ids": saved_results}
+
+    except Exception as e:
+        logger.error(f"Failed to save analysis : {e}")
+        raise HTTPException(status_code=500, detail=f"Internal error : {e}")
