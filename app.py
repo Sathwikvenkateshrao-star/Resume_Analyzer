@@ -2,16 +2,40 @@ from fastapi import FastAPI,UploadFile,File,Form,HTTPException
 from typing import List
 import tempfile
 from src.services.resume_service import ResumeService
-from src.models.resume_model import ResumeAnalysis, ResumeInput
+from src.models.resume_model import ResumeAnalysis, ResumeInput 
 from src.utils.resume_extractor import ResumeExtractor
 from src.utils.logger import get_logger
 from fastapi import FastAPI
-from src.db.database import init_db
+from fastapi.middleware.cors import CORSMiddleware #linking with Front-end
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from src.db.database import init_db ,SessionLocal
+from src.db.models import AnalysisResult, Candidate
+
+
 
 
 app = FastAPI()
 resume_service = ResumeService()
 logger = get_logger("ResumeAnalyzer")
+
+## ADDING CORS middleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = ["http://localhost:5173","http://127.0.0.1:5173"],
+    allow_credentials = True,
+    allow_methods = ["*"],
+    allow_headers = ["*"],
+)
+
+
+def get_db() :
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 @app.on_event("startup")
 def on_startup():
@@ -145,3 +169,40 @@ async def save_analysis(
     except Exception as e:
         logger.error(f"Failed to save analysis : {e}")
         raise HTTPException(status_code=500, detail=f"Internal error : {e}")
+    
+
+@app.get("/results")
+async def get_results(db: Session = Depends(get_db)):
+    results = db.query(AnalysisResult).all()
+    data = []
+    for r in results:
+        candidate = db.query(Candidate).filter(Candidate.id == r.candidate_id).first()
+        data.append({
+            "id": r.id,
+            "name": candidate.name if candidate else "N/A",
+            "score": r.score,
+            "strengths": r.strengths,
+            "weaknesses": r.weaknesses,
+            "summary": r.summary,
+        })
+    return data
+
+@app.get("/results/highscore")
+async def get_high_scorers(min_score : float = 80):
+    db:Session = SessionLocal()
+    results = db.query(AnalysisResult).filter(AnalysisResult.score >= min_score).all()
+    return results
+
+@app.get("/candidates/skill")
+async def search_by_skill(skill:str):
+    db:Session = SessionLocal()
+    candidates = db.query(Candidate).filter(Candidate.skills.like(f"%{skill}%")).all()
+    db.close()
+    return candidates
+
+@app.get("/results/{candidate_id}")
+async def get_result_by_candidate(candidate_id:int):
+    db:Session = SessionLocal()
+    results = db.query(AnalysisResult).filter(AnalysisResult.candidate_id == candidate_id).all()
+    db.close()
+    return results

@@ -1,0 +1,80 @@
+/* layout + container (keep this) */
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #242424;
+  color: rgba(255,255,255,0.9);
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+#root {
+  width: 100%;
+  max-width: 1000px;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+/* Dashboard card */
+.container {
+  background-color: #171717;
+  padding: 2.2rem;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.6);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* job-info inputs and textarea full width */
+.job-info input,
+.job-info textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255,255,255,0.06);
+  background: #262626;
+  color: #eaeaea;
+}
+
+/* fix textarea height and remove manual resize handle */
+.job-info textarea {
+  height: 120px;       /* same width as input and a good height */
+  resize: none;
+  padding: .6rem;
+}
+
+/* buttons group spacing (explicit) */
+.btn-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+/* ensure button visuals and spacing are consistent */
+.btn-group .export-btn,
+.btn-group .analyze-btn {
+  padding: .6rem 1.1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* slightly larger spacing for the button text */
+.btn-group .export-btn { background: #0f9d58; color: #fff; }
+.btn-group .analyze-btn { background: #0b63d6; color: #fff; }
+
+/* hover */
+.btn-group .export-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+.btn-group .analyze-btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+
+/* small responsive tweak */
+@media (max-width: 640px) {
+  .container { padding: 1.2rem; }
+  .job-info textarea { height: 100px; }
+  .btn-group { flex-direction: column; gap: 12px; }
+  .btn-group button { width: 100%; }
+}
