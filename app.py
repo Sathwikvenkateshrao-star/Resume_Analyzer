@@ -77,17 +77,44 @@ async def analyze_resume_file(
 async def upload_resumes(resume_files:List[UploadFile] = File(...)):
     try:
         texts = []
+
+        print(f"Received {len(resume_files)} files for upload")
+
         for file in resume_files:
+            print(f"Proceessing file : {file.filename}")
             with tempfile.NamedTemporaryFile(delete=False,suffix=f".{file.filename.split('.')[-1]}") as tmp:
                 tmp.write(await file.read())
                 file_path = tmp.name
-            texts.append(ResumeExtractor.extract_text(file_path))
+            print(f" Saved temp file at :  {file_path}")
 
-        resume_service.vectorstore.create_store(texts)
+            resume_text =ResumeExtractor.extract_text(file_path)
+
+            try:
+                resume_text =ResumeExtractor.extract_text(file_path)
+                print(f"Extracted text length : {len(resume_text)}")
+                texts.append(resume_text)
+            except Exception as extract_err :
+                print(f"Error extracting  text from {file.filename}: {extract_err}")
+                raise HTTPException(status_code=500,detail=f"Text extraction failed for {file.filename}:{extract_err}")
+            
+            
+            
+            ## creating FAISS store 
+            try:
+                print(f"Creating FAISS store with {len(texts)} resumes")
+                resume_service.vectorstore.create_store(texts)
+            except Exception as faiss_err:
+                print(f"ERROR creating FAISS store: {faiss_err}")
+                raise HTTPException(status_code=500, detail=f"Vectorstore error: {faiss_err}")
+            
+            ##LOGS THE FILE
+
         logger.info(f"Upload and indexed {len(texts)} resumes")
+
         return {"message": f"{len(texts)} resumes uploaded and indexed successfully"}
     except Exception as e :
         logger.error(f"Failed to upload resumes: {e}")
+        print(f"Unhandled error in upload_resumes :{e}")
         raise HTTPException(status_code=500,detail=f"Internal error:{e}")
     
 
@@ -125,32 +152,35 @@ async def ranked_resumes(job_description:str = Form(...)):
     # New End Point for the DB 
 @app.post("/save_analysis")
 async def save_analysis(
-    resume_files: List[UploadFile] = File(...),  # multiple resumes
     job_description: str = Form(...),
-    title: str = Form(...)
+    title: str = Form(...),
+    top_k: int = Form(10)
 ):
     try:
         job_data = {
             "title": title,
             "description": job_description
         }
+        # fetch the top_k resumes from FAISS
+        matches = resume_service.vectorstore.search_resumes(job_description,top_k=top_k) 
 
+        if not matches:
+            raise HTTPException(status_code=404,detail="No resumes found in vectorstore")
+        
         saved_results = []  
+        ranked_output = []
 
-        for resume_file in resume_files:
-            # Save file temporarily
-            with tempfile.NamedTemporaryFile(delete=False, suffix=resume_file.filename) as tmp:
-                tmp.write(await resume_file.read())
-                file_path = tmp.name
+        #Loops through top_k resumes
 
-            # Extract resume text
-            resume_txt = ResumeExtractor.extract_text(file_path)
+        for match in matches:
+            resume_txt = match.page_content
 
-            # Analyze
-            data = ResumeInput(resume_text=resume_txt, job_description=job_description)
+            ## analyze with LLM
+
+            data = ResumeInput(resume_text=resume_txt,job_description=job_description)
             result = resume_service.analyze_resume(data)
 
-            # Candidate data
+        ## candidate data ()
             candidate_data = {
                 "name": None,
                 "email": None,
@@ -158,14 +188,24 @@ async def save_analysis(
                 "skills": [],
                 "resume_text": resume_txt
             }
-
-            # Save into DB
+        # Save into DB
             saved = resume_service.save_analysis(candidate_data, job_data, result)
             saved_results.append(saved.id)
 
-        # return after processing all files
-        return {"message": f"Saved {len(saved_results)} analyses", "result_ids": saved_results}
-
+            # add to ranked ouput
+            ranked_output.append({
+                "candidate_id":saved.id,
+                "name":candidate_data["name"] or "N/A",
+                "score":result.score,
+                "strengths":result.strengths,
+                "weaknesses": result.weaknesses,
+                "summary":result.summary
+            })
+        return {
+                "message":f"Saved {len(saved_results)} analysis(Top {top_k})",
+                "result_ids":saved_results,
+                "ranked_results":ranked_output
+            }
     except Exception as e:
         logger.error(f"Failed to save analysis : {e}")
         raise HTTPException(status_code=500, detail=f"Internal error : {e}")

@@ -40,3 +40,17 @@
 2025-09-13 19:34:52,852 -ResumeAnalyzer -ERROR - Failed to save analysis :'str' object has no attribute 'get'
 2025-09-13 19:44:01,321 -ResumeAnalyzer -ERROR - Failed to save analysis :'str' object has no attribute 'get'
 2025-09-13 19:49:49,020 -ResumeAnalyzer -ERROR - Failed to save analysis :'str' object has no attribute 'get'
+2025-09-16 11:42:39,094 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
+2025-09-16 11:43:07,205 -ResumeAnalyzer -INFO - Analyzed 10 resumes against JD
+2025-09-16 11:43:41,018 -ResumeAnalyzer -INFO - Ranked 20 resumes against JD
+2025-09-16 13:05:20,199 -ResumeAnalyzer -ERROR - Failed to upload resumes: ResumeVectorStore.create_store() got an unexpected keyword argument 'metadatas'
+2025-09-16 14:44:20,134 -ResumeAnalyzer -ERROR - Failed to upload resumes: ResumeVectorStore.create_store() got an unexpected keyword argument 'metadatas'
+2025-09-16 14:48:12,933 -ResumeAnalyzer -ERROR - Failed to upload resumes: ResumeVectorStore.create_store() got an unexpected keyword argument 'metadatas'
+2025-09-16 15:00:57,832 -ResumeAnalyzer -ERROR - Failed to upload resumes: 500: Vectorstore error: ResumeVectorStore.create_store() got an unexpected keyword argument 'metadatas'
+2025-09-16 15:17:39,724 -ResumeAnalyzer -INFO - Upload and indexed 6 resumes
+2025-09-16 15:22:40,553 -ResumeAnalyzer -INFO - Upload and indexed 3 resumes
+2025-09-16 15:51:23,759 -ResumeAnalyzer -INFO - Upload and indexed 1 resumes
+2025-09-16 15:51:48,089 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
+2025-09-16 15:55:46,273 -ResumeAnalyzer -INFO - Upload and indexed 1 resumes
+2025-09-16 16:15:46,176 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
+2025-09-16 16:54:14,996 -ResumeAnalyzer -INFO - Upload and indexed 20 resumes
