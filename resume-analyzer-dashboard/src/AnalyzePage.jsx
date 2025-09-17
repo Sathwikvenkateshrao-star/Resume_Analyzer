@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import ResultsTable from "../src/ResultsTable";
 
 function AnalyzePage() {
   const [title, setTitle] = useState("");
@@ -33,10 +34,13 @@ function AnalyzePage() {
       return;
     }
 
-    const headers = ["Name", "Score", "Strengths", "Weaknesses", "Summary"];
+    const headers = ["Name","email","phone", "Score","Skills", "Strengths", "Weaknesses", "Summary"];
     const rows = results.map((r) => [
       r.name || "N/A",
+      r.email,
+      r.phone,
       r.score,
+      Array.isArray(r.skills) ? r.skills.join(", ") :r.skills,
       Array.isArray(r.strengths) ? r.strengths.join(", ") : r.strengths,
       Array.isArray(r.weaknesses) ? r.weaknesses.join(", ") : r.weaknesses,
       r.summary,
@@ -85,6 +89,7 @@ function AnalyzePage() {
             type="number"
             className="form-control"
             value={topK}
+            min={1}
             onChange={(e) => setTopK(e.target.value)}
           />
         </div>
@@ -99,31 +104,10 @@ function AnalyzePage() {
         </div>
 
         {results.length > 0 && (
-          <div className="mt-4 table-responsive">
-            <table className="table table-dark table-hover">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Score</th>
-                  <th>Strengths</th>
-                  <th>Weaknesses</th>
-                  <th>Summary</th>
-                </tr>
-              </thead>
-              <tbody>
-                {results.map((r, idx) => (
-                  <tr key={idx}>
-                    <td>{r.name || "N/A"}</td>
-                    <td>{r.score}</td>
-                    <td>{Array.isArray(r.strengths) ? r.strengths.join(", ") : r.strengths}</td>
-                    <td>{Array.isArray(r.weaknesses) ? r.weaknesses.join(", ") : r.weaknesses}</td>
-                    <td>{r.summary}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+            <div className="mt-4">
+              <ResultsTable results={results} />
+            </div>
+          )}
       </div>
     </div>
   );

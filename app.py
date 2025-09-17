@@ -14,7 +14,6 @@ from src.db.models import AnalysisResult, Candidate
 
 
 
-
 app = FastAPI()
 resume_service = ResumeService()
 logger = get_logger("ResumeAnalyzer")
@@ -74,48 +73,52 @@ async def analyze_resume_file(
 ## for multiple of resumes upload
 
 @app.post("/upload_resumes")
-async def upload_resumes(resume_files:List[UploadFile] = File(...)):
+async def upload_resumes(resume_files: List[UploadFile] = File(...)):
     try:
         texts = []
+        metadata_list = []
 
         print(f"Received {len(resume_files)} files for upload")
 
         for file in resume_files:
-            print(f"Proceessing file : {file.filename}")
-            with tempfile.NamedTemporaryFile(delete=False,suffix=f".{file.filename.split('.')[-1]}") as tmp:
+            print(f"Processing file : {file.filename}")
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix=f".{file.filename.split('.')[-1]}"
+            ) as tmp:
                 tmp.write(await file.read())
                 file_path = tmp.name
-            print(f" Saved temp file at :  {file_path}")
-
-            resume_text =ResumeExtractor.extract_text(file_path)
+            print(f"Saved temp file at : {file_path}")
 
             try:
-                resume_text =ResumeExtractor.extract_text(file_path)
+                resume_text = ResumeExtractor.extract_text(file_path)
                 print(f"Extracted text length : {len(resume_text)}")
                 texts.append(resume_text)
-            except Exception as extract_err :
-                print(f"Error extracting  text from {file.filename}: {extract_err}")
-                raise HTTPException(status_code=500,detail=f"Text extraction failed for {file.filename}:{extract_err}")
-            
-            
-            
-            ## creating FAISS store 
-            try:
-                print(f"Creating FAISS store with {len(texts)} resumes")
-                resume_service.vectorstore.create_store(texts)
-            except Exception as faiss_err:
-                print(f"ERROR creating FAISS store: {faiss_err}")
-                raise HTTPException(status_code=500, detail=f"Vectorstore error: {faiss_err}")
-            
-            ##LOGS THE FILE
+                metadata_list.append({"filename": file.filename})
+            except Exception as extract_err:
+                print(f" Error extracting text from {file.filename}: {extract_err}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Text extraction failed for {file.filename}: {extract_err}",
+                )
 
-        logger.info(f"Upload and indexed {len(texts)} resumes")
+        #  Create FAISS store ONCE, after processing all resumes
+        try:
+            print(f"Creating FAISS store with {len(texts)} resumes")
+            resume_service.vectorstore.create_store(texts, metadatas=metadata_list)
+        except Exception as faiss_err:
+            print(f" ERROR creating FAISS store: {faiss_err}")
+            raise HTTPException(
+                status_code=500, detail=f"Vectorstore error: {faiss_err}"
+            )
 
+        logger.info(f" Uploaded and indexed {len(texts)} resumes")
         return {"message": f"{len(texts)} resumes uploaded and indexed successfully"}
-    except Exception as e :
+
+    except Exception as e:
         logger.error(f"Failed to upload resumes: {e}")
-        print(f"Unhandled error in upload_resumes :{e}")
-        raise HTTPException(status_code=500,detail=f"Internal error:{e}")
+        print(f"Unhandled error in upload_resumes : {e}")
+        raise HTTPException(status_code=500, detail=f"Internal error: {e}")
+
     
 
 ### Analyze Job description against the TOP resumes(FAISS+LLM)
@@ -180,13 +183,15 @@ async def save_analysis(
             data = ResumeInput(resume_text=resume_txt,job_description=job_description)
             result = resume_service.analyze_resume(data)
 
+            extracted = resume_service.extract_candidate_info(resume_txt)
+            
         ## candidate data ()
             candidate_data = {
-                "name": None,
-                "email": None,
-                "phone": None,
-                "skills": [],
-                "resume_text": resume_txt
+            "name": extracted.get("name"),
+            "email": extracted.get("email"),
+            "phone": extracted.get("phone"),
+            "skills": extracted.get("skills", []),
+            "resume_text": resume_txt
             }
         # Save into DB
             saved = resume_service.save_analysis(candidate_data, job_data, result)
@@ -196,10 +201,13 @@ async def save_analysis(
             ranked_output.append({
                 "candidate_id":saved.id,
                 "name":candidate_data["name"] or "N/A",
+                "email":candidate_data["email"] or "N/A",
+                "phone":candidate_data["phone"] or "N/A",
+                "skills":candidate_data["skills"] or "N/A",
                 "score":result.score,
                 "strengths":result.strengths,
                 "weaknesses": result.weaknesses,
-                "summary":result.summary
+                "summary":result.summary,
             })
         return {
                 "message":f"Saved {len(saved_results)} analysis(Top {top_k})",
@@ -219,7 +227,7 @@ async def get_results(db: Session = Depends(get_db)):
         candidate = db.query(Candidate).filter(Candidate.id == r.candidate_id).first()
         data.append({
             "id": r.id,
-            "name": candidate.name if candidate else "N/A",
+            "name": candidate.name or (candidate.resume_text[:30] + "...") if candidate else "N/A",
             "score": r.score,
             "strengths": r.strengths,
             "weaknesses": r.weaknesses,

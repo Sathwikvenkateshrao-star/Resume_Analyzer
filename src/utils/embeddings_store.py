@@ -13,10 +13,14 @@ class ResumeVectorStore:
         self.embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
         self.vectorstore = None
 
-    def create_store(self,resumes:list[str]):
+    def create_store(self,resumes:list[str],metadatas: list[dict] = None):
         """ Create a new FAISS vector store from list of resumes """
-        self.vectorstore = FAISS.from_texts(resumes,self.embeddings)
+        if metadatas:
+            self.vectorstore = FAISS.from_texts(resumes,self.embeddings,metadatas=metadatas)
+        else:
+            self.vectorstore = FAISS.from_texts(resumes,self.embeddings)
         self.vectorstore.save_local(self.persist_dir)
+        
 
     def load_store(self):
         """ Load existing vector store """
