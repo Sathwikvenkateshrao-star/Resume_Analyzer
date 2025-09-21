@@ -89,3 +89,23 @@
 2025-09-17 21:27:48,861 -ResumeAnalyzer -INFO -  Uploaded and indexed 21 resumes
 2025-09-17 23:19:58,976 -ResumeAnalyzer -INFO -  Uploaded and indexed 4 resumes
 2025-09-17 23:31:29,482 -ResumeAnalyzer -INFO -  Uploaded and indexed 21 resumes
+2025-09-21 14:58:48,535 -ResumeAnalyzer -INFO -  Uploaded and indexed 21 resumes
+2025-09-21 14:59:12,502 -ResumeAnalyzer -ERROR - Failed to save analysis : (psycopg2.errors.UndefinedTable) relation "job_descriptions" does not exist
+LINE 1: INSERT INTO job_descriptions (title, description, created_at...
+                    ^
+
+[SQL: INSERT INTO job_descriptions (title, description, created_at) VALUES (%(title)s, %(description)s, %(created_at)s) RETURNING job_descriptions.id]
+[parameters: {'title': 'Web Dev', 'description': 'Looking for a backend engineer skilled in Python, FastAPI, and cloud.', 'created_at': datetime.datetime(2025, 9, 21, 9, 29, 12, 474415, tzinfo=datetime.timezone.utc)}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-09-21 15:08:52,855 -ResumeAnalyzer -INFO -  Uploaded and indexed 21 resumes
+2025-09-21 15:09:13,333 -ResumeAnalyzer -ERROR - Failed to save analysis : (psycopg2.errors.UndefinedTable) relation "job_descriptions" does not exist
+LINE 1: INSERT INTO job_descriptions (title, description, created_at...
+                    ^
+
+[SQL: INSERT INTO job_descriptions (title, description, created_at) VALUES (%(title)s, %(description)s, %(created_at)s) RETURNING job_descriptions.id]
+[parameters: {'title': 'Web Dev', 'description': 'Looking for a backend engineer skilled in Python, FastAPI, and cloud.', 'created_at': datetime.datetime(2025, 9, 21, 9, 39, 13, 322917, tzinfo=datetime.timezone.utc)}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2025-09-21 15:18:27,634 -ResumeAnalyzer -INFO -  Uploaded and indexed 3 resumes
+2025-09-21 15:18:41,383 -ResumeAnalyzer -ERROR - Failed to save analysis : 'NoneType' object has no attribute 'id'
+2025-09-21 15:36:51,485 -ResumeAnalyzer -INFO -  Uploaded and indexed 1 resumes
+2025-09-21 15:58:38,037 -ResumeAnalyzer -INFO -  Uploaded and indexed 21 resumes

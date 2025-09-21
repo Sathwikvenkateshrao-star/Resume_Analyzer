@@ -1,0 +1,13 @@
+{
+    "Servers":{
+        "1":{
+            "Name":"Resume DB",
+            "Group":"Servers",
+            "Host":"db",
+            "Port":"5432",
+            "MaintenanceDB":"resumedb",
+            "Username":"resumeuser",
+            "SSLMode":"prefer"
+        }
+    }
+}

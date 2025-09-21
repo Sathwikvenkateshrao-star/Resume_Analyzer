@@ -1,8 +1,7 @@
 from sqlalchemy import Column,Integer,String,Text,Float,ForeignKey,DateTime
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import relationship
 from datetime import datetime,timezone
-
-Base = declarative_base()
+from .database import Base
 
 class Candidate(Base):
     __tablename__ = "candidates"

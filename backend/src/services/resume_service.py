@@ -118,47 +118,53 @@ class ResumeService:
             return{"name":None, "email":None, "phone":None, "skills":[]}
     # saving in the real DB (Postgre,SQL,SQLite)
 
-    def save_analysis(self,candidate_data,job_data,analysis_result):
+    def save_analysis(self, candidate_data, job_data, analysis_result):
         db = SessionLocal()
+        try:
+            # Insert the job description into the database
+            job = JobDescription(
+                title=job_data.get("title", None),
+                description=job_data.get("description", "")
+            )
+            db.add(job)
+            db.commit()
+            db.refresh(job)
 
-        ## inserting the job description to DB
-        job = JobDescription(
-            title = job_data.get("title",None),
-            description = job_data.get("description", "")
-        )
-        db.add(job)
-        db.commit()
-        db.refresh(job)
+            # Extract metadata if missing
+            if not candidate_data.get("name"):
+                candidate_data = self.extract_candidate_info(candidate_data.get("resume_text", ""))
 
-        ## Extraact metadata if missing 
-        if not candidate_data.get("name"):
-            candidate_data = self.extract_candidate_info(candidate_data.get("resume_text", ""))
-        ## inserting the candidates to db 
+            # Insert the candidate into the database
+            candidate = Candidate(
+                name=candidate_data.get("name"),
+                email=candidate_data.get("email"),
+                phone=candidate_data.get("phone"),
+                skills=", ".join(candidate_data.get("skills", [])),
+                resume_text=candidate_data.get("resume_text", "")
+            )
+            db.add(candidate)
+            db.commit()
+            db.refresh(candidate)
 
-        candidate = Candidate(
-            name = candidate_data.get("name"),
-            email = candidate_data.get("email"),
-            phone = candidate_data.get("phone"),
-            skills = ", ".join(candidate_data.get("skills",[])),
-            resume_text = candidate_data.get("resume_text", "")
-        )
-        db.add(candidate)
-        db.commit()
-        db.refresh(candidate)
-        print("Candidate data received :",candidate_data)
-        ## inserting the Analysis Result in DB
+            # Insert the analysis result into the database
+            result = AnalysisResult(
+                candidate_id=candidate.id,
+                job_id=job.id,
+                score=analysis_result.score,
+                strengths=json.dumps(analysis_result.strengths),
+                weaknesses=json.dumps(analysis_result.weaknesses),
+                summary=analysis_result.summary,
+            )
+            db.add(result)
+            db.commit()
+            db.refresh(result)
 
-        result = AnalysisResult(
-            candidate_id = candidate.id,
-            job_id = job.id,
-            score = analysis_result.score,
-            strengths = json.dumps(analysis_result.strengths),
-            weaknesses = json.dumps(analysis_result.weaknesses),
-            summary = analysis_result.summary,
-        )
-        db.add(result)
-        db.commit()
-        db.refresh(result)
+            return result
 
-        db.close()
-        return result
+        except Exception as e:
+            print("Error saving analysis:", str(e))
+            db.rollback()
+            return None
+
+        finally:
+            db.close()

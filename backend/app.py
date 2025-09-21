@@ -1,17 +1,18 @@
-from fastapi import FastAPI,UploadFile,File,Form,HTTPException
+from fastapi import FastAPI,UploadFile,File,Form,HTTPException,Request
+from fastapi.middleware.cors import CORSMiddleware #linking with Front-end
+from fastapi import Depends
+from fastapi.responses import StreamingResponse
+import time
+import json
 from typing import List
 import tempfile
 from src.services.resume_service import ResumeService
 from src.models.resume_model import ResumeAnalysis, ResumeInput 
 from src.utils.resume_extractor import ResumeExtractor
 from src.utils.logger import get_logger
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware #linking with Front-end
-from fastapi import Depends
 from sqlalchemy.orm import Session
 from src.db.database import init_db ,SessionLocal
 from src.db.models import AnalysisResult, Candidate
-
 
 
 app = FastAPI()
@@ -254,3 +255,14 @@ async def get_result_by_candidate(candidate_id:int):
     results = db.query(AnalysisResult).filter(AnalysisResult.candidate_id == candidate_id).all()
     db.close()
     return results
+
+# fot progress loader
+
+@app.get("/progress")
+async def progress():
+    def event_stream():
+        for percent in range(0,101,2):
+            data = {"progress":percent, "message":f"Analyzing....{percent}%"}
+            yield f"data: {json.dumps(data)}\n\n"
+            time.sleep(1)
+    return StreamingResponse(event_stream(), media_type="text/event-stream")

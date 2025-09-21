@@ -1,16 +1,24 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from src.db.models import Base
+from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
+import os
 
-DATABASE_URL = "sqlite:///./resume_analyzer.db"
+# Load .env file
+load_dotenv()
 
-engine = create_engine(DATABASE_URL,connect_args={"check_same_thread":False})
+# Read database URL from .env
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://user:password@localhost:5432/resume_db")
 
+# Create engine (NO connect_args for PostgreSQL)
+engine = create_engine(DATABASE_URL)
 
-SessionLocal = sessionmaker(autocommit = False,autoflush=False,bind=engine)
+# Create a configured "Session" class
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Base class for ORM models
+Base = declarative_base()
 
 def init_db():
+    # Create tables from models
+    import src.db.models  # make sure models are imported here
     Base.metadata.create_all(bind=engine)
-    
-    
