@@ -2,17 +2,23 @@ from fastapi import FastAPI,UploadFile,File,Form,HTTPException,Request
 from fastapi.middleware.cors import CORSMiddleware #linking with Front-end
 from fastapi import Depends
 from fastapi.responses import StreamingResponse
-import time
-import json
+from fastapi.security import OAuth2PasswordRequestForm
 from typing import List
-import tempfile
 from src.services.resume_service import ResumeService
 from src.models.resume_model import ResumeAnalysis, ResumeInput 
 from src.utils.resume_extractor import ResumeExtractor
 from src.utils.logger import get_logger
-from sqlalchemy.orm import Session
 from src.db.database import init_db ,SessionLocal
 from src.db.models import AnalysisResult, Candidate
+from src.Auth.auth import authenticate_user, create_access_token, get_current_user, Token
+from src.db.crud_hr import get_hr_by_email, create_hr_user
+from src.db.database import SessionLocal
+from datetime import timedelta,datetime
+from sqlalchemy.orm import Session
+import time
+import json
+import tempfile
+import asyncio
 
 
 app = FastAPI()
@@ -74,7 +80,10 @@ async def analyze_resume_file(
 ## for multiple of resumes upload
 
 @app.post("/upload_resumes")
-async def upload_resumes(resume_files: List[UploadFile] = File(...)):
+async def upload_resumes(
+    resume_files: List[UploadFile] = File(...),
+    current_user: dict = Depends(get_current_user)
+    ):
     try:
         texts = []
         metadata_list = []
@@ -219,6 +228,17 @@ async def save_analysis(
         logger.error(f"Failed to save analysis : {e}")
         raise HTTPException(status_code=500, detail=f"Internal error : {e}")
     
+# fot progress loader
+
+@app.get("/progress")
+async def progress():
+    async def event_stream():
+        for percent in range(0,101,2):
+            data = {"progress":percent, "message":f"Analyzing....{percent}%"}
+            yield f"data: {json.dumps(data)}\n\n"
+            await asyncio.sleep(1)
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+    
 
 @app.get("/results")
 async def get_results(db: Session = Depends(get_db)):
@@ -256,13 +276,27 @@ async def get_result_by_candidate(candidate_id:int):
     db.close()
     return results
 
-# fot progress loader
 
-@app.get("/progress")
-async def progress():
-    def event_stream():
-        for percent in range(0,101,2):
-            data = {"progress":percent, "message":f"Analyzing....{percent}%"}
-            yield f"data: {json.dumps(data)}\n\n"
-            time.sleep(1)
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+## Authentiaction and Authorization 
+
+@app.post("/register_hr")
+def register_hr(email:str = Form(...),
+                 password:str = Form(...), 
+                 db:Session = Depends(get_db)):
+    existing = get_hr_by_email(db, email)
+    if existing:
+        raise HTTPException(status_code=400, detail="User already exists")
+
+    new_user = create_hr_user(db, email, password)   # hashes password before saving
+    return {"message": "HR registered successfully", "email": new_user.email}
+    
+
+@app.post("/login", response_model=Token)
+async def login (form_data: OAuth2PasswordRequestForm = Depends(),db: Session = Depends (get_db)):
+    user = authenticate_user(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    access_token_expires = timedelta(minutes=30)
+    access_token = create_access_token(data={"sub":user.email}, expires_delta=access_token_expires)
+    return {"access_token": access_token, "token_type":"bearer"}

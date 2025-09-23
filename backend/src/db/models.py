@@ -42,3 +42,10 @@ class AnalysisResult(Base):
 
     candidate = relationship("Candidate",back_populates="analyses")
     job = relationship("JobDescription",back_populates="analyses")
+
+class HRUser(Base):
+    __tablename__ = "hr_users"
+
+    id = Column(Integer,primary_key=True, index=True)
+    email = Column(String, unique=True, nullable=False)
+    hashed_password = Column(String, nullable=False)

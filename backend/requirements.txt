@@ -6,6 +6,9 @@ python-dotenv
 python-multipart
 pdfplumber
 python-docx
+python-jose[cryptography] 
+passlib[bcrypt] 
+fastapi[all]
 faiss-cpu
 sentence-transformers
 langchain
@@ -14,7 +17,4 @@ langchain_core
 langchain_groq
 langchain_openai
 langchain-huggingface
-pandas
-numpy
-sympy
-mpmath
+

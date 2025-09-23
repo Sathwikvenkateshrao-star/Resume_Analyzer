@@ -109,3 +109,14 @@ LINE 1: INSERT INTO job_descriptions (title, description, created_at...
 2025-09-21 15:18:41,383 -ResumeAnalyzer -ERROR - Failed to save analysis : 'NoneType' object has no attribute 'id'
 2025-09-21 15:36:51,485 -ResumeAnalyzer -INFO -  Uploaded and indexed 1 resumes
 2025-09-21 15:58:38,037 -ResumeAnalyzer -INFO -  Uploaded and indexed 21 resumes
+2025-09-22 13:06:52,797 -ResumeAnalyzer -INFO -  Uploaded and indexed 3 resumes
+2025-09-22 17:04:18,127 -ResumeAnalyzer -INFO -  Uploaded and indexed 21 resumes
+2025-09-22 17:13:07,000 -ResumeAnalyzer -INFO -  Uploaded and indexed 1 resumes
+2025-09-22 17:28:41,601 -ResumeAnalyzer -INFO -  Uploaded and indexed 1 resumes
+2025-09-22 20:05:41,373 -ResumeAnalyzer -INFO -  Uploaded and indexed 1 resumes
+2025-09-22 20:14:28,183 -ResumeAnalyzer -INFO -  Uploaded and indexed 1 resumes
+2025-09-22 20:22:07,217 -ResumeAnalyzer -INFO -  Uploaded and indexed 1 resumes
+2025-09-22 20:23:41,177 -ResumeAnalyzer -INFO -  Uploaded and indexed 1 resumes
+2025-09-22 20:31:30,224 -ResumeAnalyzer -INFO -  Uploaded and indexed 1 resumes
+2025-09-23 11:50:51,084 -ResumeAnalyzer -INFO -  Uploaded and indexed 21 resumes
+2025-09-23 14:42:42,796 -ResumeAnalyzer -INFO -  Uploaded and indexed 21 resumes

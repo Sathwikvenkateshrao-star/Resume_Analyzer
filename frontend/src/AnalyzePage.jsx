@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import ResultsTable from "../src/ResultsTable";
 import Loader from "./Loader";
+import Navbar from "./Navbar";
 
 function AnalyzePage() {
   const [title, setTitle] = useState("");
@@ -12,7 +13,37 @@ function AnalyzePage() {
   const [loadingText, setLoadingText] = useState("");
   const [progress, setProgress] = useState(0);
 
-  // 🔹 Analyze resumes
+  // 🔹 Run final backend analysis after progress completes
+  const runAnalysis = async () => {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("job_description", jobDescription);
+    formData.append("top_k", topK);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await axios.post(
+        "http://127.0.0.1:8000/save_analysis",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setResults(res.data.ranked_results || []);
+    } catch (err) {
+      console.error(err);
+      alert("Error analyzing the resumes");
+    } finally {
+      setLoading(false);
+      setProgress(0);
+    }
+  };
+
+  // 🔹 Analyze resumes with SSE progress
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
       alert("Please Enter job description");
@@ -25,35 +56,22 @@ function AnalyzePage() {
 
     const evtSource = new EventSource("http://127.0.0.1:8000/progress");
 
-    evtSource.onmessage = (event) =>{
-      const data =JSON.parse(event.data);
+    evtSource.onmessage = (event) => {
+      const data = JSON.parse(event.data);
       setProgress(data.progress);
       setLoadingText(data.message);
 
-      if (data.progress >= 100){
+      if (data.progress >= 100) {
         evtSource.close();
-        setLoading(false);
+        runAnalysis(); // ✅ Only call API once progress is finished
       }
-    }
+    };
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("job_description", jobDescription);
-    formData.append("top_k", topK);
-
-    try {
-      const res = await axios.post(
-        "http://127.0.0.1:8000/save_analysis",
-        formData,
-      );
-      setResults(res.data.ranked_results || []);
-    } catch (err) {
-      console.error(err);
-      alert("Error analyzing the resumes");
-    } finally {
+    evtSource.onerror = (err) => {
+      console.error("SSE connection error:", err);
+      evtSource.close();
       setLoading(false);
-      setProgress(0);
-    }
+    };
   };
 
   // 🔹 Export results as CSV
@@ -67,7 +85,6 @@ function AnalyzePage() {
     setLoading(true);
     setProgress(0);
 
-    // Simulate progress bar for CSV export
     let percent = 0;
     const interval = setInterval(() => {
       percent += 20;
@@ -122,83 +139,86 @@ function AnalyzePage() {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="card shadow p-4 position-relative">
-        <h2 className="text-center mb-4">Analyze Resumes</h2>
+    <>
+      <Navbar />
+      <div className="container mt-5">
+        <div className="card shadow p-4 position-relative">
+          <h2 className="text-center mb-4">Analyze Resumes</h2>
 
-        {loading ? (
-          <div className="text-center">
-            <Loader text={loadingText} />
-            {/* Progress Bar */}
-            <div className="progress w-100 mt-3" style={{ height: "25px" }}>
-              <div
-                className="progress-bar progress-bar-striped progress-bar-animated"
-                role="progressbar"
-                style={{ width: `${progress}%` }}
-                aria-valuenow={progress}
-                aria-valuemin="0"
-                aria-valuemax="100"
-              >
-                {progress}%
+          {loading ? (
+            <div className="text-center">
+              <Loader text={loadingText} />
+              {/* Progress Bar */}
+              <div className="progress w-100 mt-3" style={{ height: "25px" }}>
+                <div
+                  className="progress-bar progress-bar-striped progress-bar-animated"
+                  role="progressbar"
+                  style={{ width: `${progress}%` }}
+                  aria-valuenow={progress}
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  {progress}%
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <>
-            {/* Form */}
-            <div className="mb-3">
-              <input
-                type="text"
-                placeholder="Job Title"
-                className="form-control"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-
-            <div className="mb-3">
-              <textarea
-                placeholder="Paste job description..."
-                className="form-control"
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-              />
-            </div>
-
-            <div className="mb-3">
-              <input
-                type="number"
-                className="form-control"
-                value={topK}
-                min={1}
-                onChange={(e) => setTopK(e.target.value)}
-              />
-            </div>
-
-            <div className="d-flex gap-2">
-              <button
-                className="btn btn-success flex-fill"
-                onClick={handleAnalyze}
-              >
-                Analyze Resumes
-              </button>
-              <button
-                className="btn btn-primary flex-fill"
-                onClick={handleExportCSV}
-              >
-                Export CSV
-              </button>
-            </div>
-
-            {results.length > 0 && (
-              <div className="mt-4">
-                <ResultsTable results={results} />
+          ) : (
+            <>
+              {/* Form */}
+              <div className="mb-3">
+                <input
+                  type="text"
+                  placeholder="Job Title"
+                  className="form-control"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
               </div>
-            )}
-          </>
-        )}
+
+              <div className="mb-3">
+                <textarea
+                  placeholder="Paste job description..."
+                  className="form-control"
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                />
+              </div>
+
+              <div className="mb-3">
+                <input
+                  type="number"
+                  className="form-control"
+                  value={topK}
+                  min={1}
+                  onChange={(e) => setTopK(e.target.value)}
+                />
+              </div>
+
+              <div className="d-flex gap-2">
+                <button
+                  className="btn btn-success flex-fill"
+                  onClick={handleAnalyze}
+                >
+                  Analyze Resumes
+                </button>
+                <button
+                  className="btn btn-primary flex-fill"
+                  onClick={handleExportCSV}
+                >
+                  Export CSV
+                </button>
+              </div>
+
+              {results.length > 0 && (
+                <div className="mt-4">
+                  <ResultsTable results={results} />
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -1,3 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
 venv/
+.venv/
+ResEnv/
+backend/ResEnv/
+
+# Node modules
+frontend/node_modules/
+
+# Build
+dist/
+build/
+
+# Others
 .env
-resume_analyzer.db/

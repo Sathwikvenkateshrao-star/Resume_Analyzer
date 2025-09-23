@@ -3,6 +3,7 @@ import axios from "axios";
 import { useDropzone } from "react-dropzone";
 import { useNavigate } from "react-router-dom";
 import Loader from "./Loader";
+import Navbar from "./Navbar";
 
 function UploadPage(){
     const [files, setFiles] = useState([]);
@@ -44,14 +45,21 @@ function UploadPage(){
         setProgress(0)
 
         try{
-            const res = await axios.post("http://127.0.0.1:8000/upload_resumes",formData)
-            onUploadProgress:(progressEvent)=>{
+
+            const token = localStorage.getItem("token");
+
+            const res = await axios.post("http://127.0.0.1:8000/upload_resumes",formData,{
+              headers: {
+                Authorization:`bearer ${token}`,
+              },
+              onUploadProgress:(progressEvent)=>{
               const percent = Math.round(
                 (progressEvent.loaded * 100)/progressEvent.total
               );
               setProgress(percent);
               setLoadingText(`Uploading resumes..${percent}%`);
-            };
+            }
+            })
             setMessage(res.data.message);
             // this will cleaar after the upload
             setFiles([]);
@@ -64,11 +72,12 @@ function UploadPage(){
         }
     };
       return (
+        <> 
+
+        <Navbar/>
     <div className="container mt-5">
       <div className="card shadow p-4">
-        <h2 className="text-center mb-4">Upload Resumes</h2>
-
-
+          <h2 className="text-center mb-4">Upload Resumes</h2>
         {/* Loader */}
         {loading ? (
           <div className="text-center">
@@ -133,7 +142,11 @@ function UploadPage(){
 
         {message &&  !loading &&(
             <div className="text-center mt-4">
-                <p className="text-success">{message}</p>
+              <div
+                className={`alert ${message.includes("Error")? "alert-danger":"alert-success"}`}
+                 role="alert">
+                {message}
+                </div>
                 {/* Navigate to analyze */}
                 <button className="btn btn-success mt-2" onClick={() => navigate("/analyze")}>
                     Go to Analyze Resumes
@@ -145,6 +158,7 @@ function UploadPage(){
         )}
       </div>
     </div>
+    </>
   );
 }
 
